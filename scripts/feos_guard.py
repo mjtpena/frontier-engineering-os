@@ -8,11 +8,15 @@ Rules (only for commits carrying a 'FEOS-Agent: <id>' trailer — human commits 
 Usage: python scripts/feos_guard.py --base origin/main
 """
 from __future__ import annotations
-import argparse, fnmatch, subprocess, sys
+import argparse, fnmatch, re, subprocess, sys
 
 PROTECTED = ["feos/*", "feos.config.yaml", ".github/workflows/*", ".github/CODEOWNERS", "CLAUDE.md", "AGENTS.md",
              ".claude/settings.json", "scripts/feos_*", ".eslintrc*", "eslint.config.*", ".editorconfig",
-             "pyproject.toml", "setup.cfg", ".flake8", "ruff.toml", ".ruff.toml", "*.ruleset", ".github/copilot-instructions.md"]
+             "pyproject.toml", "setup.cfg", ".flake8", "ruff.toml", ".ruff.toml", "*.ruleset", ".github/copilot-instructions.md",
+             ".claude/*", ".github/*", "feos-tests/*", "scripts/requirements.txt"]
+# Any line "FEOS-Agent: <id>" in the message counts, not only git's final trailer block
+# (a later Co-Authored-By paragraph must not hide the agent identity from the guard).
+AGENT_RE = re.compile(r"^FEOS-Agent:\s*(\S+)", re.I | re.M)
 TEST_GLOBS = ["tests/*", "test/*", "*/tests/*", "*.test.*", "*.spec.*", "*_test.*", "test_*.py", "*/test_*.py"]
 
 def git(*args):
@@ -27,9 +31,9 @@ def main():
     errors = []
     tester_files: set[str] = set()
     for sha in reversed(git("rev-list", f"{base}..HEAD").split()):   # oldest first
-        trailers = git("log", "-1", "--format=%(trailers:key=FEOS-Agent,valueonly)", sha).strip().lower()
-        if not trailers: continue
-        agent = trailers.splitlines()[0].strip()
+        m = AGENT_RE.search(git("log", "-1", "--format=%B", sha))
+        if not m: continue
+        agent = m.group(1).strip().lower()
         for line in git("show", "--name-status", "--format=", sha).splitlines():
             parts = line.split("\t"); status, path = parts[0], parts[-1]
             old_path = parts[1] if status[0] == "R" else path

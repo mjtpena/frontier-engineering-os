@@ -1,10 +1,12 @@
-# Replace @TBD-* with real GitHub users/teams. Framework and pipeline changes require human owners.
-/feos/                 @TBD-tech-lead
-/feos.config.yaml      @TBD-tech-lead
-/.github/              @TBD-tech-lead
-/scripts/feos_*        @TBD-tech-lead
-/CLAUDE.md             @TBD-tech-lead
-/AGENTS.md             @TBD-tech-lead
-/specs/                @TBD-product-owner
-/architecture/         @TBD-tech-lead
-/evals/                @TBD-rai-owner
+# Framework and pipeline changes require human owners. Single maintainer today; add teams as they form.
+/feos/                 @mjtpena
+/feos.config.yaml      @mjtpena
+/.github/              @mjtpena
+/.claude/              @mjtpena
+/feos-tests/           @mjtpena
+/scripts/feos_*        @mjtpena
+/CLAUDE.md             @mjtpena
+/AGENTS.md             @mjtpena
+/specs/                @mjtpena
+/architecture/         @mjtpena
+/evals/                @mjtpena

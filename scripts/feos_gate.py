@@ -88,11 +88,16 @@ def cmd_record(a):
     gate = yaml.safe_load(gate_file.read_text())
     checks = json.loads(Path(a.checks).read_text())
     by_id = {c["id"]: c for c in checks}
+    import feos_state
+    approved = {(e["decision"], e.get("scope")) for e in feos_state.load().get("escalations", []) if e.get("status") == "approved"}
     failed, pending = [], []
     out_checks = []
     for c in gate["checks"]:
         got = by_id.get(c["id"], {"status": "pending"})
         st = got["status"]
+        if c["type"] == "human" and st == "pass" and (c.get("decision"), a.scope) not in approved:
+            st = "pending"   # a human check passes only via a resolved escalation (feos_state.py resolve)
+            got.setdefault("evidence", []).append(f"no approved escalation {c.get('decision')} for scope {a.scope} in .feos/state.json")
         if st == "skipped_not_applicable" and "when" not in c:
             st = "fail"; got.setdefault("evidence", []).append("skipped but check is unconditional")
         out_checks.append({"id": c["id"], "type": c["type"], "hard": c["hard"], "status": st, "evidence": got.get("evidence", [])})
@@ -113,7 +118,6 @@ def cmd_record(a):
     out = ROOT / "evidence/gates" / f"{a.gate}-{a.scope}-{ts.replace(':', '')}.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(rec, indent=2))
-    import feos_state
     feos_state.record_gate(f"{a.gate}:{a.scope}", result, str(out.relative_to(ROOT)))
     print(json.dumps({"result": result, "failed_hard_checks": failed, "pending": pending, "evidence": str(out.relative_to(ROOT))}, indent=2))
     return 0 if result == "pass" else (2 if result == "pending_human" else 1)

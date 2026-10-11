@@ -7,12 +7,13 @@ permissions:
   contents: read
 jobs:
   validate:
+    name: feos-validate   # the required status check name (README, github.md)
     runs-on: ubuntu-latest
     steps:
-      # Pin actions to full commit SHAs in your org (L2 github.md). Tags shown for readability.
-      - uses: actions/checkout@v4
+      # Actions pinned to full commit SHAs (L2 github.md); Dependabot can bump them.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7 (resolved 2026-10-11)
         with: {fetch-depth: 0}
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7 (resolved 2026-10-11)
         with: {python-version: "3.12"}
       - run: pip install -r scripts/requirements.txt pytest
       - name: Framework self-check

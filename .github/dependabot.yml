@@ -1,0 +1,8 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions   # keeps the SHA-pinned actions current
+    directory: "/"
+    schedule: {interval: weekly}
+  - package-ecosystem: pip
+    directory: "/scripts"
+    schedule: {interval: weekly}

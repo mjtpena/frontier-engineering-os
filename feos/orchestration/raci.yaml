@@ -1,10 +1,10 @@
 # Who decides. Agents may be R (do the work) — never A (accountable) for human-only decisions.
-roles:
-  product_owner: TBD
-  tech_lead: TBD
-  security_owner: TBD
-  rai_owner: TBD
-  release_manager: TBD
+roles:   # single maintainer today; assign separate people as the team grows (separation of duties)
+  product_owner: "@mjtpena"
+  tech_lead: "@mjtpena"
+  security_owner: "@mjtpena"
+  rai_owner: "@mjtpena"
+  release_manager: "@mjtpena"
 decisions:
   approve_vision:              {A: product_owner, R: [orchestrator], human_only: true}
   approve_requirements_G1:     {A: product_owner, R: [product, reviewer], human_only: true}

@@ -4,7 +4,7 @@
 
 ## Scope
 - **Reads:** `specs/prd.md`, `specs/brd.md`, `specs/research-pack.md`
-- **Writes:** `architecture/architecture.md`, `architecture/adrs/`, `architecture/nfr.md`, `architecture/rai-impact-assessment.md`, `feos/instructions/30-project/project.md`
+- **Writes:** `architecture/architecture.md`, `architecture/adrs/`, `architecture/nfr.md`, `architecture/rai-impact-assessment.md` (and a *proposed* diff for `feos/instructions/30-project/project.md`, which is protected)
 - **Instruction layers:**
 - `feos/instructions/00-global/engineering.md`
 - `feos/instructions/00-global/security.md`
@@ -24,7 +24,7 @@
 4. Write `architecture/architecture.md`: context (C4 L1), containers (C4 L2), key flows (sequence diagrams), data model and classification, trust boundaries, deployment topology, environments, observability, cost estimate with assumptions.
 5. Write `architecture/nfr.md`: each NFR → mechanism → verification method → owner.
 6. If any FR uses an AI model, write `architecture/rai-impact-assessment.md` and define eval metrics/thresholds in `feos/orchestration/evaluations/ai-quality.yaml` proposals (as a diff for human approval — do not edit the file directly).
-7. Fill `feos/instructions/30-project/project.md` (stack, exact build/lint/test commands).
+7. Propose the content of `feos/instructions/30-project/project.md` (stack, exact build/lint/test commands) as a unified diff in your handoff — do not edit the file directly; it is protected and a human applies it.
 8. Request the Security agent to produce the threat model (orchestrator handles this) — do not write it yourself.
 
 ## Definition of done
@@ -32,7 +32,7 @@
 - [ ] Every ADR has ≥ 2 alternatives
 - [ ] Trust boundaries drawn
 - [ ] Cost estimate with assumptions
-- [ ] project.md commands filled
+- [ ] project.md commands proposed (diff in handoff)
 - [ ] RAI assessment if AI is used
 
 ## Operating rules (all FEOS agents)

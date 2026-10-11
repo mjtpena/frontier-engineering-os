@@ -10,8 +10,8 @@ jobs:
   verify-approval-evidence:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7 (resolved 2026-10-11)
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7 (resolved 2026-10-11)
         with: {python-version: "3.12"}
       - run: pip install -r scripts/requirements.txt
       - name: Approval file must be approved by a human
@@ -29,12 +29,12 @@ jobs:
     runs-on: ubuntu-latest
     environment: staging
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7 (resolved 2026-10-11)
       - run: echo "TODO(project) deploy to staging using IaC + azure/login OIDC, then run smoke tests"
   deploy-production:
     needs: deploy-staging
     runs-on: ubuntu-latest
     environment: production   # configure required human reviewers on this environment
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7 (resolved 2026-10-11)
       - run: echo "TODO(project) deploy to production; run smoke tests; auto-rollback on failure per rollback-plan"

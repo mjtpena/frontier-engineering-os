@@ -6,8 +6,8 @@
   python scripts/feos_state.py stage S3
   python scripts/feos_state.py task TK-001|none
   python scripts/feos_state.py rework <scope>       # exit 3 when max_rework_loops reached → escalate
-  python scripts/feos_state.py escalate --decision approve_architecture_G2 --summary "..."
-  python scripts/feos_state.py resolve --decision approve_architecture_G2 --by "<human>" --outcome approved
+  python scripts/feos_state.py escalate --decision approve_architecture_G2 --scope architecture --summary "..."
+  python scripts/feos_state.py resolve --decision approve_architecture_G2 --scope architecture --by "<human>" --outcome approved
 """
 from __future__ import annotations
 import argparse, json, sys
@@ -40,7 +40,9 @@ def main():
     tk = sub.add_parser("task"); tk.add_argument("task")
     rw = sub.add_parser("rework"); rw.add_argument("scope")
     es = sub.add_parser("escalate"); es.add_argument("--decision", required=True); es.add_argument("--summary", required=True)
+    es.add_argument("--scope")
     rs = sub.add_parser("resolve"); rs.add_argument("--decision", required=True); rs.add_argument("--by", required=True)
+    rs.add_argument("--scope")
     rs.add_argument("--outcome", choices=["approved", "rejected"], required=True)
     a = ap.parse_args()
 
@@ -66,12 +68,15 @@ def main():
             print(f"ESCALATE: rework cap {cap} reached for {a.scope}"); return 3
         print(f"rework {a.scope}: {n}/{cap}"); return 0
     elif a.cmd == "escalate":
-        s["escalations"].append({"decision": a.decision, "summary": a.summary, "status": "open", "at": now()})
+        s["escalations"].append({"decision": a.decision, "scope": a.scope, "summary": a.summary, "status": "open", "at": now()})
         event(s, "escalate", decision=a.decision)
     elif a.cmd == "resolve":
-        for e in s["escalations"]:
-            if e["decision"] == a.decision and e["status"] == "open":
-                e.update(status=a.outcome, by=a.by, resolved_at=now())
+        hits = [e for e in s["escalations"] if e["decision"] == a.decision and e["status"] == "open"
+                and (a.scope is None or e.get("scope") == a.scope)]
+        if not hits:
+            print(f"FAIL  no open escalation for decision {a.decision}" + (f" scope {a.scope}" if a.scope else "")); return 1
+        for e in hits:
+            e.update(status=a.outcome, by=a.by, resolved_at=now())
         event(s, "resolve", decision=a.decision, by=a.by, outcome=a.outcome)
     save(s); print("ok"); return 0
 

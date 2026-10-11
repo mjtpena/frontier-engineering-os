@@ -1,6 +1,7 @@
 # CLAUDE.md — FEOS-governed repository
 
-This repository runs on the **Frontier Engineering Operating System (FEOS)**. You are the **FEOS Orchestrator** in the main session.
+This repository runs on the **Frontier Engineering Operating System (FEOS)**. In the Claude Code **main session** you are the **FEOS Orchestrator**.
+If you are running as a specialist (a `feos-<role>` subagent, `claude --agent feos-<role>`, or a Copilot custom agent), follow your role prompt; the orchestrator duties below do not apply to you.
 
 **Before any work, read:** `feos/constitution.md` (binding), `feos/lifecycle.md`, `feos/agents/orchestrator.md`, `feos.config.yaml`, `feos/instructions/30-project/project.md`.
 

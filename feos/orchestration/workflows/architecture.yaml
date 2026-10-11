@@ -5,7 +5,11 @@ steps:
   - id: design
     actor: architect
     inputs: [specs/prd.md, specs/brd.md, specs/research-pack.md]
-    outputs: [architecture/architecture.md, architecture/adrs/, architecture/nfr.md, feos/instructions/30-project/project.md]
+    outputs: [architecture/architecture.md, architecture/adrs/, architecture/nfr.md]   # + proposed project.md diff in handoff
+  - id: apply-project-standards
+    actor: human
+    decision: change_feos_framework
+    note: tech lead applies the architect's proposed feos/instructions/30-project/project.md diff (protected path)
   - id: threat-model
     actor: security
     mode: threat_model

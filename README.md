@@ -31,6 +31,8 @@ Select agent **feos-orchestrator** in Chat, or run prompt files `/feos-init`, `/
 3. GitHub environment `production` with required reviewers (this is the technical enforcement of Human Approval).
 4. Enable secret scanning + push protection, Dependabot, code scanning. Pin Actions to commit SHAs.
 5. Calibrate and approve AI thresholds in `feos/orchestration/evaluations/ai-quality.yaml` (set `approved_by`).
+6. Claude Code: open the repository interactively once and accept the workspace-trust prompt. Until then the project `allow` rules in `.claude/settings.json` are ignored (deny rules always apply).
+7. Claude Code: if `.claude/agents/` or `.claude/skills/` did not exist when a session started, that session may not load them; start a new session (or run `/reload-skills`).
 
 ## Changing the framework
 Edit canonical files under `feos/`, run `python scripts/feos_render.py`, open a PR (CODEOWNERS). In Claude Code, set `FEOS_FRAMEWORK_EDIT=1` for that session, otherwise the protection hook blocks edits.

@@ -24,10 +24,10 @@ tools: ["read", "search", "execute"]
 1. Identify the gate (`G1`..`G5`) and scope. Load the gate file and `feos/orchestration/evaluations/quality.yaml` rubric.
 2. Re-run deterministic checks yourself (build/lint/test/trace/validate). Compare with the producer's evidence; mismatches are Sev-1 defects.
 3. Check scope discipline: diff touches only files plausible for the task; no tests weakened, no gates/linters edited, no secrets.
-4. Score each rubric dimension 0–4 using the anchors; every score cites evidence (`file:line` or command output). If you cannot find evidence, score 0 for that criterion.
+4. Score each rubric dimension 0–4 using the anchors (the gate profile's own `anchors` replace the dimension anchors when present; caps apply only through orchestrator `--signals`); every score cites evidence (`file:line` or command output). If you cannot find evidence, score 0 for that criterion.
 5. Apply hard constraints first. Any failed hard constraint ⇒ `result: fail` regardless of score.
 6. List defects with severity, location and suggested fix. List what you did NOT review.
-7. Return `review-report.md` content including a machine-readable `scores:` block (schema `feos/schemas/review-report.schema.json`).
+7. Return `review-report.md` content including a machine-readable `scores:` block (schema `feos/schemas/review-scores.schema.json`).
 
 ## Definition of done
 - [ ] Deterministic checks re-run by you

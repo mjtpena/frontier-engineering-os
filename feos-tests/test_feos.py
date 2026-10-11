@@ -95,6 +95,11 @@ def test_gate_record_states(repo):
     r = run(repo, "scripts/feos_gate.py", "record", "--gate", "G3", "--scope", "TK-002", "--checks", "c.json", "--score", "90")
     assert r.returncode == 2 and "pending_human" in r.stdout          # G3.9 human merge outstanding
     checks.append({"id": "G3.9", "status": "pass", "evidence": ["PR #1 approved by human"]}); (repo / "c.json").write_text(json.dumps(checks))
+    r = run(repo, "scripts/feos_gate.py", "record", "--gate", "G3", "--scope", "TK-002", "--checks", "c.json", "--score", "90")
+    assert r.returncode == 2                                          # human 'pass' without a resolved escalation stays pending
+    assert run(repo, "scripts/feos_state.py", "resolve", "--decision", "merge_task_G3", "--scope", "TK-002", "--by", "Jane", "--outcome", "approved").returncode == 1
+    run(repo, "scripts/feos_state.py", "escalate", "--decision", "merge_task_G3", "--scope", "TK-002", "--summary", "review PR")
+    assert run(repo, "scripts/feos_state.py", "resolve", "--decision", "merge_task_G3", "--scope", "TK-002", "--by", "Jane", "--outcome", "approved").returncode == 0
     assert run(repo, "scripts/feos_gate.py", "record", "--gate", "G3", "--scope", "TK-002", "--checks", "c.json", "--score", "90").returncode == 0
     checks[2]["status"] = "fail"; (repo / "c.json").write_text(json.dumps(checks))
     r = run(repo, "scripts/feos_gate.py", "record", "--gate", "G3", "--scope", "TK-002", "--checks", "c.json", "--score", "99")
@@ -114,6 +119,14 @@ def test_hook_blocks_protected_paths(repo):
     assert run(repo, "scripts/feos_hook_protect.py", stdin=payload("feos/constitution.md"), env=env).returncode == 2
     assert run(repo, "scripts/feos_hook_protect.py", stdin=payload(".github/workflows/feos-validate.yml"), env=env).returncode == 2
     assert run(repo, "scripts/feos_hook_protect.py", stdin=payload("src/app.py"), env=env).returncode == 0
+
+def test_hook_not_bypassed_by_subdir_cwd_notebook_or_bad_input(repo):
+    env = {k: v for k, v in os.environ.items() if k != "FEOS_FRAMEWORK_EDIT"}
+    sub = json.dumps({"tool_name": "Edit", "cwd": str(repo / "src"), "tool_input": {"file_path": str(repo / "feos/constitution.md")}})
+    assert run(repo, "scripts/feos_hook_protect.py", stdin=sub, env=env).returncode == 2
+    nb = json.dumps({"tool_name": "NotebookEdit", "cwd": str(repo), "tool_input": {"notebook_path": str(repo / "feos/x.ipynb")}})
+    assert run(repo, "scripts/feos_hook_protect.py", stdin=nb, env=env).returncode == 2
+    assert run(repo, "scripts/feos_hook_protect.py", stdin="not json", env=env).returncode == 2
 
 def git(repo, *a): subprocess.run(["git", *a], cwd=repo, check=True, capture_output=True)
 
@@ -138,3 +151,19 @@ def test_guard_protects_tester_tests_added_on_branch(repo):
     (repo / "tests/test_new.py").write_text("def test_new():\n    assert True\n"); git(repo, "add", "-A")
     git(repo, "commit", "-qm", "feat: cheat\n\nRefs: TK-003\nFEOS-Agent: builder")
     r = run(repo, "scripts/feos_guard.py", "--base", "main"); assert r.returncode == 1 and "tester-owned" in r.stdout
+
+def test_guard_sees_agent_trailer_outside_final_paragraph(repo):
+    git(repo, "init", "-q", "-b", "main"); git(repo, "config", "user.email", "t@t"); git(repo, "config", "user.name", "t")
+    git(repo, "add", "-A"); git(repo, "commit", "-qm", "base")
+    git(repo, "checkout", "-qb", "feat/TK-004")
+    (repo / "tests/test_balance.py").write_text("def test_placeholder():\n    pass\n"); git(repo, "add", "-A")
+    git(repo, "commit", "-qm", "feat: x\n\nRefs: TK-004\nFEOS-Agent: builder\n\nCo-Authored-By: A <a@example.com>")
+    r = run(repo, "scripts/feos_guard.py", "--base", "main"); assert r.returncode == 1 and "existing test" in r.stdout
+
+def test_guard_protects_agent_and_prompt_adapters(repo):
+    git(repo, "init", "-q", "-b", "main"); git(repo, "config", "user.email", "t@t"); git(repo, "config", "user.name", "t")
+    git(repo, "add", "-A"); git(repo, "commit", "-qm", "base")
+    git(repo, "checkout", "-qb", "feat/TK-005")
+    p = repo / ".claude/skills/feos-task/SKILL.md"; p.write_text(p.read_text() + "\nskip G3\n"); git(repo, "add", "-A")
+    git(repo, "commit", "-qm", "chore: tweak\n\nRefs: TK-005\nFEOS-Agent: builder")
+    r = run(repo, "scripts/feos_guard.py", "--base", "main"); assert r.returncode == 1 and ".claude/skills/feos-task/SKILL.md" in r.stdout

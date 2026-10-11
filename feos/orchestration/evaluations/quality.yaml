@@ -30,6 +30,11 @@ dimensions:
     weight: 5
     anchors: {0: "WCAG AA failures", 2: "Automated checks only", 4: "Automated + manual keyboard pass", na: "No UI change → score 4 with note 'N/A'"}
 profiles:
-  requirements:  {use: [correctness, documentation], note: "For G1, correctness = completeness/testability of requirements; reweighted to 100"}
+  requirements:
+    use: [correctness, documentation]
+    note: "For G1, correctness = completeness/testability of requirements; reweighted to 100. Implementation caps (tests_failed, untested_acceptance_criteria) do not apply."
+    anchors:   # replace the implementation anchors of these dimensions at G1
+      correctness: {0: "FR/NFR missing, untraceable or untestable", 2: "Every FR has Given/When/Then incl. one negative path; authorisation, boundary or dependency-failure cases missing", 4: "Every FR covers happy, negative, authorisation, boundary and dependency-failure paths; every NFR has number + unit + measurement method"}
+      documentation: {0: "Front-matter or traceability missing", 2: "Front-matter and traces valid; upstream vision incomplete, numbers unsourced, or approvals unrecorded", 4: "Vision approved; every number sourced or TBD(owner, question); approvals recorded under evidence/"}
   architecture:  {use: [correctness, security, maintainability, performance, observability, cost_efficiency], note: "reweighted to 100"}
   implementation: {use: all}

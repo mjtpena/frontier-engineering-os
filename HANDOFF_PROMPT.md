@@ -21,7 +21,7 @@ You are installing and proving the **Frontier Engineering Operating System (FEOS
 ## Phase 2 — Verify the integration with the real tools (don't trust the kit's assumptions)
 1. Fetch the current official docs for Claude Code subagents, skills, hooks and settings permissions, and for GitHub Copilot custom agents, `.instructions.md` and `.prompt.md` files. Compare them with the kit's front-matter and file locations (`.claude/agents`, `.claude/skills/*/SKILL.md`, `.claude/settings.json` hooks/permissions, `.github/agents/*.agent.md`, `.github/instructions`, `.github/prompts`). Pay particular attention to `JUDGEMENT.md` L4: the prompt-file `agent:` key and the Copilot tool aliases. Report each mismatch with a doc link.
 2. Prove the Claude side in this session:
-   - (a) `/agents` lists the 9 `feos-*` subagents.
+   - (a) The 9 `feos-*` subagents load. (Claude Code 2.1.x removed the `/agents` list; check the agents in a new session's init output, e.g. `claude -p --output-format stream-json --verbose`, or invoke one.)
    - (b) The `/feos-*` skills are available.
    - (c) Attempt an Edit to `feos/constitution.md` **without** `FEOS_FRAMEWORK_EDIT=1` and confirm the hook blocks it, then revert any change.
    - (d) Confirm the permission deny rules load.

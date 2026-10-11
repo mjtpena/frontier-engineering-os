@@ -1,17 +1,20 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python scripts/feos_:*)",
+      "Bash(python scripts/feos_*)",
       "Bash(git status:*)",
       "Bash(git diff:*)",
       "Bash(git log:*)"
     ],
+    "ask": [
+      "Bash(python scripts/feos_state.py resolve *)"
+    ],
     "deny": [
-      "Read(./.env)",
-      "Read(./.env.*)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
       "Read(./**/*.pem)",
       "Read(./**/*.pfx)",
-      "Read(./secrets/**)",
+      "Read(**/secrets/**)",
       "Bash(git push --force:*)",
       "Bash(git push -f:*)",
       "Bash(git push origin main:*)"
@@ -20,11 +23,11 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Edit|Write|MultiEdit",
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
         "hooks": [
           {
             "type": "command",
-            "command": "python scripts/feos_hook_protect.py"
+            "command": "python \"$(git rev-parse --show-toplevel)/scripts/feos_hook_protect.py\""
           }
         ]
       }
