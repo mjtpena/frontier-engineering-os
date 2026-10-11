@@ -1,0 +1,10 @@
+# Replace @TBD-* with real GitHub users/teams. Framework and pipeline changes require human owners.
+/feos/                 @TBD-tech-lead
+/feos.config.yaml      @TBD-tech-lead
+/.github/              @TBD-tech-lead
+/scripts/feos_*        @TBD-tech-lead
+/CLAUDE.md             @TBD-tech-lead
+/AGENTS.md             @TBD-tech-lead
+/specs/                @TBD-product-owner
+/architecture/         @TBD-tech-lead
+/evals/                @TBD-rai-owner

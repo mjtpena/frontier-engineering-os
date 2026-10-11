@@ -1,0 +1,28 @@
+id: release
+description: S6 Hardening → G4, G5 → Human Approval → S7 Release
+entry: {requires_state: [S6]}
+steps:
+  - id: security-review
+    actor: security
+    mode: review
+    outputs: ["evidence/release/{version}/security-review.md"]
+  - id: gate-g4
+    actor: orchestrator
+    action: run_gate
+    gate: G4
+  - id: ops-readiness
+    actor: release
+    outputs: ["evidence/release/{version}/release-notes.md", "evidence/release/{version}/rollback-plan.md", docs/runbooks/, "evidence/release/{version}/approval.md"]
+  - id: gate-g5
+    actor: orchestrator
+    action: run_gate
+    gate: G5
+  - id: human-approval
+    actor: human
+    decision: approve_production_release
+    enforcement: GitHub environment 'production' required reviewers + approval.md decision=approved
+  - id: deploy
+    actor: ci
+    workflow: .github/workflows/feos-release.yml
+exit: {set_state: S8}
+on_fail: {route_to: by_check, max_loops: from_config}

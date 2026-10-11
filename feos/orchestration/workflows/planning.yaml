@@ -1,0 +1,20 @@
+id: planning
+description: S4 Planning
+entry: {requires_state: [S4], requires_gates: [G2]}
+steps:
+  - id: decompose
+    actor: planner
+    inputs: [specs/prd.md, architecture/]
+    outputs: [plan/backlog.yaml]
+  - id: validate
+    actor: orchestrator
+    action: run_commands
+    commands:
+      - python scripts/feos_validate.py --backlog plan/backlog.yaml
+      - python scripts/feos_trace.py --stage plan
+  - id: approve
+    actor: human
+    decision: approve_backlog
+    optional: true
+exit: {set_state: S5}
+on_fail: {route_to: planner, max_loops: from_config}

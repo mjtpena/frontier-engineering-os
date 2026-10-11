@@ -1,0 +1,27 @@
+# plan/backlog.yaml — validated by feos/schemas/backlog.schema.json
+version: "1.0"
+release: v0.1.0
+epics:
+  - id: EP-01
+    title: <epic>
+    features:
+      - id: FT-001
+        title: <feature>
+        stories:
+          - id: ST-001
+            title: As a <persona> I want <capability> so that <benefit>
+            covers: [FR-001]
+            acceptance:
+              - "Given ... When ... Then ..."
+tasks:
+  - id: TK-001
+    story: ST-001
+    title: Define API contract for <capability>
+    type: contract            # contract | test | impl | infra | docs | spike
+    estimate_hours: 2         # must be <= 8
+    status: ready             # backlog | ready | in_progress | review | done | blocked
+    depends_on: []
+    covers: [FR-001]
+    files_hint: [api/openapi.yaml]
+    acceptance: ["openapi.yaml validates; endpoint, schemas and error responses defined"]
+    instructions: "Follow L1 API standards; Problem Details errors."

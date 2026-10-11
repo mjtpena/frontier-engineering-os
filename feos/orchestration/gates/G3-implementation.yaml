@@ -1,0 +1,16 @@
+id: G3
+name: Implementation quality (per task / PR)
+stage: S5
+scope: task
+checks:
+  - {id: G3.1, type: deterministic, hard: true, desc: "Build passes", cmd: "project.build"}
+  - {id: G3.2, type: deterministic, hard: true, desc: "Lint/format clean", cmd: "project.lint"}
+  - {id: G3.3, type: deterministic, hard: true, desc: "All tests pass", cmd: "project.test"}
+  - {id: G3.4, type: deterministic, hard: true, desc: "Coverage on changed code >= quality.min_coverage", cmd: "project.test (coverage report)"}
+  - {id: G3.5, type: deterministic, hard: true, desc: "Red evidence exists (tests failed before implementation) for impl tasks", cmd: "python scripts/feos_validate.py --task-evidence {task}"}
+  - {id: G3.6, type: deterministic, hard: true, desc: "Tester-owned tests unchanged by builder; no edits to feos/, gates, CI, linter config", cmd: "python scripts/feos_guard.py --base origin/main"}
+  - {id: G3.7, type: deterministic, hard: true, desc: "No secrets in diff", cmd: "CI secret scanning / gitleaks"}
+  - {id: G3.8, type: agent, agent: reviewer, hard: false, desc: "Weighted quality score >= quality.release_threshold, no dimension below floor"}
+  - {id: G3.9, type: human, decision: merge_task_G3, hard: true, desc: "CODEOWNER approves PR"}
+scoring: {rubric: feos/orchestration/evaluations/quality.yaml, profile: implementation}
+on_fail: {route_to: builder}

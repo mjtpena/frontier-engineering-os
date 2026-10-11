@@ -1,0 +1,13 @@
+id: G1
+name: Requirements quality
+stage: S2
+scope: specs
+checks:
+  - {id: G1.1, type: deterministic, hard: true, desc: "Front-matter present and valid on brd.md/prd.md", cmd: "python scripts/feos_validate.py --artifacts specs"}
+  - {id: G1.2, type: deterministic, hard: true, desc: "Every FR/NFR traces to a BR", cmd: "python scripts/feos_trace.py --stage requirements"}
+  - {id: G1.3, type: deterministic, hard: false, desc: "Ambiguity lint (vague terms)", cmd: "python scripts/feos_lint_requirements.py specs/prd.md"}
+  - {id: G1.4, type: agent, agent: reviewer, hard: true, desc: "Every FR has Given/When/Then incl. a negative path; every NFR measurable"}
+  - {id: G1.5, type: agent, agent: reviewer, hard: false, desc: "Requirements are consistent (no contradictions) and solution-free"}
+  - {id: G1.6, type: human, decision: approve_requirements_G1, hard: true, desc: "Product owner approves PRD"}
+scoring: {rubric: feos/orchestration/evaluations/quality.yaml, profile: requirements}
+on_fail: {route_to: product}

@@ -1,0 +1,321 @@
+# FEOS agent registry. Canonical prompts live in feos/agents/*.md; .claude/ and .github/ files are rendered adapters.
+# Regenerate adapters with: python scripts/feos_render.py
+version: '1.0'
+agents:
+- id: discovery
+  name: FEOS Discovery
+  stage: S1
+  description: FEOS S1 Discovery. Use to turn a vision or problem statement into a research pack and risk register before
+    requirements are written. Researches context, constraints, prior art and risks; cites every external fact.
+  reads:
+  - specs/vision.md
+  writes:
+  - specs/research-pack.md
+  - specs/risk-register.md
+  templates:
+  - research-pack.md
+  - risk-register.md
+  instruction_layers:
+  - feos/instructions/00-global/documentation.md
+  - feos/instructions/20-domain
+  read_only: false
+  claude:
+    file: .claude/agents/feos-discovery.md
+    tools: Read, Grep, Glob, Write, WebSearch, WebFetch
+    model: sonnet
+  copilot:
+    file: .github/agents/feos-discovery.agent.md
+    tools:
+    - read
+    - search
+    - edit
+    - web
+  prompt: feos/agents/discovery.md
+- id: product
+  name: FEOS Product
+  stage: S2
+  description: FEOS S2 Definition. Use to write or revise the BRD and PRD (business requirements, functional/non-functional
+    requirements, personas, journeys, acceptance criteria) from the vision and research pack.
+  reads:
+  - specs/vision.md
+  - specs/research-pack.md
+  - specs/risk-register.md
+  writes:
+  - specs/brd.md
+  - specs/prd.md
+  templates:
+  - brd.md
+  - prd.md
+  instruction_layers:
+  - feos/instructions/00-global/documentation.md
+  - feos/instructions/00-global/accessibility.md
+  - feos/instructions/20-domain
+  read_only: false
+  claude:
+    file: .claude/agents/feos-product.md
+    tools: Read, Grep, Glob, Write, Edit
+    model: opus
+  copilot:
+    file: .github/agents/feos-product.agent.md
+    tools:
+    - read
+    - search
+    - edit
+  prompt: feos/agents/product.md
+- id: architect
+  name: FEOS Architect
+  stage: S3
+  description: FEOS S3 Architecture. Use to produce the solution architecture, ADRs, NFR mapping, cost estimate and (for AI
+    features) RAI impact assessment from an approved PRD. Does not write production code.
+  reads:
+  - specs/prd.md
+  - specs/brd.md
+  - specs/research-pack.md
+  writes:
+  - architecture/architecture.md
+  - architecture/adrs/
+  - architecture/nfr.md
+  - architecture/rai-impact-assessment.md
+  - feos/instructions/30-project/project.md
+  templates:
+  - architecture.md
+  - adr.md
+  - nfr.md
+  - rai-impact-assessment.md
+  instruction_layers:
+  - feos/instructions/00-global/engineering.md
+  - feos/instructions/00-global/security.md
+  - feos/instructions/00-global/responsible-ai.md
+  - feos/instructions/10-platform
+  - feos/instructions/20-domain
+  read_only: false
+  claude:
+    file: .claude/agents/feos-architect.md
+    tools: Read, Grep, Glob, Write, Edit, WebSearch, WebFetch
+    model: opus
+  copilot:
+    file: .github/agents/feos-architect.agent.md
+    tools:
+    - read
+    - search
+    - edit
+    - web
+  prompt: feos/agents/architect.md
+- id: planner
+  name: FEOS Planner
+  stage: S4
+  description: "FEOS S4 Planning. Use to decompose an approved PRD and architecture into a schema-valid backlog (epics, features,\
+    \ stories, tasks \u2264 1 day) with dependencies, traceability and per-task instructions."
+  reads:
+  - specs/prd.md
+  - architecture/
+  writes:
+  - plan/backlog.yaml
+  templates:
+  - backlog.yaml
+  instruction_layers:
+  - feos/instructions/00-global/engineering.md
+  read_only: false
+  claude:
+    file: .claude/agents/feos-planner.md
+    tools: Read, Grep, Glob, Write, Edit, Bash
+    model: sonnet
+  copilot:
+    file: .github/agents/feos-planner.agent.md
+    tools:
+    - read
+    - search
+    - edit
+    - execute
+  prompt: feos/agents/planner.md
+- id: tester
+  name: FEOS Tester
+  stage: S5
+  description: FEOS S5 test-first agent. Use before implementing a task to write failing tests derived from the story's acceptance
+    criteria, tagged @covers FR-###. Also builds AI eval datasets. Never writes production code.
+  reads:
+  - plan/backlog.yaml
+  - specs/prd.md
+  - architecture/
+  writes:
+  - tests/
+  - evals/
+  - evidence/tasks/
+  templates:
+  - task-evidence.md
+  instruction_layers:
+  - feos/instructions/00-global/engineering.md
+  - feos/instructions/00-global/responsible-ai.md
+  read_only: false
+  claude:
+    file: .claude/agents/feos-tester.md
+    tools: Read, Grep, Glob, Write, Edit, Bash
+    model: sonnet
+  copilot:
+    file: .github/agents/feos-tester.agent.md
+    tools:
+    - read
+    - search
+    - edit
+    - execute
+  prompt: feos/agents/tester.md
+- id: builder
+  name: FEOS Builder
+  stage: S5
+  description: FEOS S5 implementation agent. Use to implement exactly one backlog task (TK-###) on its own branch, making
+    the Tester's failing tests pass without modifying them, following all instruction layers.
+  reads:
+  - plan/backlog.yaml
+  - architecture/
+  - tests/
+  writes:
+  - src/
+  - infra/
+  - docs/
+  - evidence/tasks/
+  templates:
+  - task-evidence.md
+  instruction_layers:
+  - feos/instructions/00-global/engineering.md
+  - feos/instructions/00-global/security.md
+  - feos/instructions/00-global/accessibility.md
+  - feos/instructions/10-platform
+  - feos/instructions/20-domain
+  read_only: false
+  claude:
+    file: .claude/agents/feos-builder.md
+    tools: Read, Grep, Glob, Write, Edit, Bash
+    model: sonnet
+  copilot:
+    file: .github/agents/feos-builder.agent.md
+    tools:
+    - read
+    - search
+    - edit
+    - execute
+  prompt: feos/agents/builder.md
+- id: security
+  name: FEOS Security
+  stage: S3,S6
+  description: FEOS security reviewer (read-only). Use in S3 to produce the STRIDE threat model and in S6/G4 to review code,
+    IaC, dependencies, secrets and AI attack surface (prompt injection, tool abuse). Returns findings; never edits code.
+  reads:
+  - architecture/
+  - src/
+  - infra/
+  - .github/
+  writes: []
+  templates:
+  - threat-model.md
+  - review-report.md
+  instruction_layers:
+  - feos/instructions/00-global/security.md
+  - feos/instructions/00-global/responsible-ai.md
+  - feos/instructions/10-platform
+  - feos/instructions/20-domain
+  read_only: true
+  claude:
+    file: .claude/agents/feos-security.md
+    tools: Read, Grep, Glob, Bash
+    model: opus
+  copilot:
+    file: .github/agents/feos-security.agent.md
+    tools:
+    - read
+    - search
+    - execute
+  prompt: feos/agents/security.md
+- id: reviewer
+  name: FEOS Reviewer
+  stage: S5,S6
+  description: 'FEOS independent reviewer (read-only). Use to judge an artifact or task diff against its gate rubric (G1-G5):
+    verifies evidence, runs tests, scores each quality dimension with citations, and returns pass/fail with defects. Never
+    edits.'
+  reads:
+  - '**'
+  writes: []
+  templates:
+  - review-report.md
+  instruction_layers:
+  - feos/instructions/00-global/engineering.md
+  - feos/instructions/00-global/security.md
+  - feos/instructions/00-global/documentation.md
+  - feos/instructions/00-global/accessibility.md
+  - feos/instructions/00-global/responsible-ai.md
+  read_only: true
+  claude:
+    file: .claude/agents/feos-reviewer.md
+    tools: Read, Grep, Glob, Bash
+    model: opus
+  copilot:
+    file: .github/agents/feos-reviewer.agent.md
+    tools:
+    - read
+    - search
+    - execute
+  prompt: feos/agents/reviewer.md
+- id: release
+  name: FEOS Release
+  stage: S6,S7,S8
+  description: FEOS release and operations agent. Use to prepare release notes, deployment plan, rollback plan, runbooks and
+    operational-readiness evidence (Gate G5), and to execute deployments only after human approval is recorded.
+  reads:
+  - plan/backlog.yaml
+  - architecture/
+  - evidence/
+  writes:
+  - docs/runbooks/
+  - evidence/release/
+  - CHANGELOG.md
+  templates:
+  - release-notes.md
+  - rollback-plan.md
+  - runbook.md
+  - approval.md
+  instruction_layers:
+  - feos/instructions/00-global/engineering.md
+  - feos/instructions/00-global/security.md
+  - feos/instructions/10-platform
+  read_only: false
+  claude:
+    file: .claude/agents/feos-release.md
+    tools: Read, Grep, Glob, Write, Edit, Bash
+    model: sonnet
+  copilot:
+    file: .github/agents/feos-release.agent.md
+    tools:
+    - read
+    - search
+    - edit
+    - execute
+  prompt: feos/agents/release.md
+- id: orchestrator
+  name: FEOS Orchestrator
+  stage: all
+  description: 'FEOS orchestrator. Runs the lifecycle state machine: reads .feos/state.json, dispatches the right specialist
+    agent for the current stage, runs gates, persists read-only agents'' reports, enforces rework limits, and escalates human
+    decisions.'
+  reads:
+  - '**'
+  writes:
+  - .feos/
+  - evidence/
+  templates: []
+  instruction_layers:
+  - feos/constitution.md
+  - feos/lifecycle.md
+  read_only: false
+  claude:
+    file: CLAUDE.md + .claude/skills/feos-*
+    tools: main session
+    model: inherit
+  copilot:
+    file: .github/agents/feos-orchestrator.agent.md
+    tools:
+    - read
+    - search
+    - edit
+    - execute
+    - agent
+    - todo
+  prompt: feos/agents/orchestrator.md

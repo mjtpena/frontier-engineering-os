@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FEOS run state",
+  "type": "object",
+  "required": [
+    "feos_version",
+    "stage",
+    "gates",
+    "rework",
+    "history"
+  ],
+  "properties": {
+    "feos_version": {
+      "type": "string"
+    },
+    "stage": {
+      "enum": [
+        "S0",
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5",
+        "S6",
+        "HA",
+        "S7",
+        "S8"
+      ]
+    },
+    "release": {
+      "type": "string"
+    },
+    "current_task": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "gates": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "enum": [
+              "pass",
+              "fail",
+              "pending_human",
+              "not_run"
+            ]
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "rework": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "escalations": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "at",
+          "event"
+        ]
+      }
+    }
+  }
+}

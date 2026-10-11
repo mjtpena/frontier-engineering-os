@@ -1,0 +1,18 @@
+# Who decides. Agents may be R (do the work) — never A (accountable) for human-only decisions.
+roles:
+  product_owner: TBD
+  tech_lead: TBD
+  security_owner: TBD
+  rai_owner: TBD
+  release_manager: TBD
+decisions:
+  approve_vision:              {A: product_owner, R: [orchestrator], human_only: true}
+  approve_requirements_G1:     {A: product_owner, R: [product, reviewer], human_only: true}
+  approve_architecture_G2:     {A: tech_lead, R: [architect, security, reviewer], human_only: true}
+  approve_backlog:             {A: tech_lead, R: [planner], human_only: false}
+  merge_task_G3:               {A: tech_lead, R: [tester, builder, reviewer], human_only: true}   # PR approval via CODEOWNERS
+  accept_security_risk:        {A: security_owner, R: [security], human_only: true}
+  approve_ai_thresholds:       {A: rai_owner, R: [architect], human_only: true}
+  approve_production_release:  {A: release_manager, R: [release], human_only: true}
+  change_feos_framework:       {A: tech_lead, R: [], human_only: true}
+  instruction_layer_exception: {A: tech_lead, R: [], human_only: true}

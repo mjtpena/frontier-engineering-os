@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FEOS gate result",
+  "type": "object",
+  "required": [
+    "gate",
+    "scope",
+    "timestamp",
+    "result",
+    "checks"
+  ],
+  "properties": {
+    "gate": {
+      "type": "string",
+      "pattern": "^G[1-5]$"
+    },
+    "scope": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "result": {
+      "enum": [
+        "pass",
+        "fail",
+        "pending_human"
+      ]
+    },
+    "score": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 100
+    },
+    "threshold": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "hard",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "deterministic",
+              "agent",
+              "human"
+            ]
+          },
+          "hard": {
+            "type": "boolean"
+          },
+          "status": {
+            "enum": [
+              "pass",
+              "fail",
+              "pending",
+              "skipped_not_applicable"
+            ]
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "failed_hard_checks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "route_to": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

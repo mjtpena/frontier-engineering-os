@@ -1,0 +1,18 @@
+id: discovery
+description: S0 Intake + S1 Discovery
+entry: {requires_state: [S0]}
+steps:
+  - id: intake
+    actor: orchestrator
+    action: create_or_update
+    artifact: specs/vision.md
+    template: feos/templates/vision.md
+  - id: approve-vision
+    actor: human
+    decision: approve_vision
+    evidence: specs/vision.md#front-matter.status==approved
+  - id: research
+    actor: discovery
+    inputs: [specs/vision.md]
+    outputs: [specs/research-pack.md, specs/risk-register.md]
+exit: {set_state: S2}

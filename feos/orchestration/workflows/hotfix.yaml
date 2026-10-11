@@ -1,0 +1,29 @@
+id: hotfix
+description: Expedited path for production incidents. Gates are NOT skipped; scope is minimised.
+entry: {requires_state: [S8]}
+steps:
+  - id: incident
+    actor: human
+    decision: declare_incident
+  - id: task
+    actor: planner
+    outputs: [plan/backlog.yaml]     # single TK with type=impl, label=hotfix
+  - id: red
+    actor: tester
+  - id: green
+    actor: builder
+  - id: review
+    actor: reviewer
+    gate: G3
+  - id: security
+    actor: security
+    mode: review
+    scope: diff_only
+  - id: approve
+    actor: human
+    decision: approve_production_release
+  - id: deploy
+    actor: ci
+  - id: post-incident
+    actor: release
+    outputs: [docs/incidents/]

@@ -1,0 +1,32 @@
+version: "1.0"
+release: v0.1.0
+epics:
+  - id: EP-01
+    title: Leave balance
+    features:
+      - id: FT-001
+        title: Balance lookup
+        stories:
+          - id: ST-001
+            title: As an employee I want my leave balance so that I can plan leave
+            covers: [FR-001, NFR-001]
+            acceptance: ["Given an authenticated employee When they ask Then balance shown"]
+tasks:
+  - id: TK-001
+    story: ST-001
+    title: Define balance API contract
+    type: contract
+    estimate_hours: 2
+    status: ready
+    depends_on: []
+    covers: [FR-001]
+    acceptance: ["openapi.yaml validates"]
+  - id: TK-002
+    story: ST-001
+    title: Implement balance endpoint
+    type: impl
+    estimate_hours: 6
+    status: backlog
+    depends_on: [TK-001]
+    covers: [FR-001, NFR-001]
+    acceptance: ["AC1 and AC2 tests pass"]

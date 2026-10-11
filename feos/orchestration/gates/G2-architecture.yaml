@@ -1,0 +1,15 @@
+id: G2
+name: Architecture quality
+stage: S3
+scope: architecture
+checks:
+  - {id: G2.1, type: deterministic, hard: true, desc: "Artifacts present + front-matter valid", cmd: "python scripts/feos_validate.py --artifacts architecture"}
+  - {id: G2.2, type: deterministic, hard: true, desc: "Every NFR mapped to a mechanism and verification", cmd: "python scripts/feos_trace.py --stage architecture"}
+  - {id: G2.3, type: agent, agent: reviewer, hard: true, desc: "Each ADR has >= 2 genuine alternatives and consequences"}
+  - {id: G2.4, type: agent, agent: security, hard: true, desc: "Threat model covers every trust boundary; no unmitigated High/Critical threat"}
+  - {id: G2.5, type: agent, agent: reviewer, hard: true, desc: "Cost estimate present with assumptions; ops model (monitoring, on-call, backup/DR) defined"}
+  - {id: G2.6, type: agent, agent: reviewer, hard: true, when: uses_ai, desc: "RAI impact assessment complete; eval metrics + thresholds proposed"}
+  - {id: G2.7, type: human, decision: approve_architecture_G2, hard: true, desc: "Tech lead signs off architecture"}
+  - {id: G2.8, type: human, decision: approve_ai_thresholds, hard: true, when: uses_ai, desc: "RAI owner approves AI thresholds"}
+scoring: {rubric: feos/orchestration/evaluations/quality.yaml, profile: architecture}
+on_fail: {route_to: architect}

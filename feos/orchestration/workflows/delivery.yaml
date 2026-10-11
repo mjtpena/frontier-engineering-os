@@ -1,0 +1,31 @@
+id: delivery
+description: S5 Implementation — runs once per task in dependency order
+entry: {requires_state: [S5]}
+foreach:
+  items: plan/backlog.yaml#tasks[status in (ready)] ordered_by depends_on
+  concurrency: from_config.orchestration.parallel_tasks
+  steps:
+    - id: red
+      actor: tester
+      skip_if: task.type in (docs, spike, infra)
+      outputs: [tests/, "evidence/tasks/{task}/tests-red.txt"]
+    - id: green
+      actor: builder
+      outputs: [src/, "evidence/tasks/{task}/build.txt", "evidence/tasks/{task}/summary.md"]
+    - id: review
+      actor: reviewer
+      gate: G3
+      outputs: ["evidence/tasks/{task}/review.md"]   # persisted by orchestrator
+    - id: gate
+      actor: orchestrator
+      action: run_gate
+      gate: G3
+    - id: open-pr
+      actor: orchestrator
+      action: open_pull_request
+      branch: feat/{task}-{slug}
+    - id: merge
+      actor: human
+      decision: merge_task_G3
+  on_fail: {route_to: builder, test_defect_route_to: tester, max_loops: from_config}
+exit: {when: all release-scope tasks done, set_state: S6}
