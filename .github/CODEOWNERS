@@ -2,6 +2,8 @@
 /feos/                 @TBD-tech-lead
 /feos.config.yaml      @TBD-tech-lead
 /.github/              @TBD-tech-lead
+/.claude/              @TBD-tech-lead
+/feos-tests/           @TBD-tech-lead
 /scripts/feos_*        @TBD-tech-lead
 /CLAUDE.md             @TBD-tech-lead
 /AGENTS.md             @TBD-tech-lead
