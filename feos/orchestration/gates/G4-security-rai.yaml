@@ -7,7 +7,7 @@ checks:
   - {id: G4.2, type: deterministic, hard: true, desc: "Dependency audit — 0 Critical/High without approved exception", cmd: "project dependency audit"}
   - {id: G4.3, type: deterministic, hard: true, desc: "IaC scan — 0 Critical/High", cmd: "checkov / PSRule for Azure / tfsec per iac"}
   - {id: G4.4, type: agent, agent: security, hard: true, desc: "Manual review: 0 Critical/High findings open; Mediums have owner + expiry"}
-  - {id: G4.5, type: deterministic, hard: true, when: uses_ai, desc: "AI eval suite meets thresholds in ai-quality.yaml", cmd: "python scripts/feos_gate.py --ai-eval evidence/release/{version}/ai-eval.json"}
+  - {id: G4.5, type: deterministic, hard: true, when: uses_ai, desc: "AI eval suite meets thresholds in ai-quality.yaml", cmd: "python scripts/feos_gate.py ai-eval evidence/release/{version}/ai-eval.json"}
   - {id: G4.6, type: agent, agent: security, hard: true, when: uses_ai, desc: "Red-team / prompt-injection cases executed with results recorded"}
   - {id: G4.7, type: human, decision: accept_security_risk, hard: false, desc: "Any accepted risks signed by security owner"}
 scoring: {rubric: feos/orchestration/evaluations/security.yaml}
