@@ -95,6 +95,11 @@ def test_gate_record_states(repo):
     r = run(repo, "scripts/feos_gate.py", "record", "--gate", "G3", "--scope", "TK-002", "--checks", "c.json", "--score", "90")
     assert r.returncode == 2 and "pending_human" in r.stdout          # G3.9 human merge outstanding
     checks.append({"id": "G3.9", "status": "pass", "evidence": ["PR #1 approved by human"]}); (repo / "c.json").write_text(json.dumps(checks))
+    r = run(repo, "scripts/feos_gate.py", "record", "--gate", "G3", "--scope", "TK-002", "--checks", "c.json", "--score", "90")
+    assert r.returncode == 2                                          # human 'pass' without a resolved escalation stays pending
+    assert run(repo, "scripts/feos_state.py", "resolve", "--decision", "merge_task_G3", "--scope", "TK-002", "--by", "Jane", "--outcome", "approved").returncode == 1
+    run(repo, "scripts/feos_state.py", "escalate", "--decision", "merge_task_G3", "--scope", "TK-002", "--summary", "review PR")
+    assert run(repo, "scripts/feos_state.py", "resolve", "--decision", "merge_task_G3", "--scope", "TK-002", "--by", "Jane", "--outcome", "approved").returncode == 0
     assert run(repo, "scripts/feos_gate.py", "record", "--gate", "G3", "--scope", "TK-002", "--checks", "c.json", "--score", "90").returncode == 0
     checks[2]["status"] = "fail"; (repo / "c.json").write_text(json.dumps(checks))
     r = run(repo, "scripts/feos_gate.py", "record", "--gate", "G3", "--scope", "TK-002", "--checks", "c.json", "--score", "99")

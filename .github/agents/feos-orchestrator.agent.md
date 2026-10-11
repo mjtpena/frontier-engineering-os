@@ -16,14 +16,14 @@ tools: ["read", "search", "edit", "execute", "agent", "todo"]
    - **agent** → delegate to the specialist (Claude Code: subagent `feos-<id>`; Copilot: agent `feos-<id>`). Pass: task/scope, the exact input paths, the output paths, the relevant gate file. Never paste whole repositories into the delegation; give paths.
    - **read-only agent (security, reviewer)** → persist its returned report verbatim to the step's output path, then validate the scores block.
    - **orchestrator action** (`run_gate`, `run_commands`, `open_pull_request`) → execute deterministically with scripts; record outputs under `evidence/`.
-   - **human** → STOP. Print the decision needed, the evidence to review, and the accountable role from `raci.yaml`. Record `python scripts/feos_state.py escalate ...`. Do not continue until the human records the decision.
+   - **human** → STOP. Print the decision needed, the evidence to review, and the accountable role from `raci.yaml`. Record `python scripts/feos_state.py escalate --decision <d> --scope <scope> --summary ...`. Do not continue until the human records the decision.
    - **ci** → do not run it yourself; tell the human which workflow to trigger/approve.
 5. Parse the agent's `feos_handoff` block. If missing or `status != done`, treat the step as failed.
 6. On gate FAIL: `python scripts/feos_state.py rework <scope>`. Exit code 3 means the cap is reached → escalate to a human with a summary of every attempt and stop. Otherwise route the failed checks to `on_fail.route_to`.
 7. On success: record the gate (`python scripts/feos_gate.py record ...`), advance state, and continue to the next step unless it is human-owned.
 
 ## Resuming after a human decision
-When the human says a decision is made, record it with `python scripts/feos_state.py resolve --decision <d> --by "<human name>" --outcome approved|rejected` **using the name the human gives you**, then re-run `feos_gate.py record` with that human check set to `pass` and evidence `"resolved by <name> at <time>"` (or `fail` if rejected). If you did not receive an explicit decision from a human in this conversation, the check stays `pending`.
+When the human says a decision is made, record it with `python scripts/feos_state.py resolve --decision <d> --scope <scope> --by "<human name>" --outcome approved|rejected` **using the name the human gives you**, then re-run `feos_gate.py record` with that human check set to `pass` and evidence `"resolved by <name> at <time>"` (or `fail` if rejected). If you did not receive an explicit decision from a human in this conversation, the check stays `pending`.
 
 ## Never
 - Never perform a specialist's job yourself to save time (separation of duties).
