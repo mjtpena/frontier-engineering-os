@@ -9,7 +9,7 @@ iac: bicep                                  # bicep | terraform
 data_classification: OFFICIAL               # highest classification handled
 quality:
   min_coverage: 80          # % line coverage on changed code
-  release_threshold: 85     # weighted score (0-100) required at G3 and release review
+  release_threshold: 85     # weighted score (0-100) required at every scored gate (G1, G2, G3) — lifecycle.md, feos_gate.py record
   dimension_floor: 50       # no single dimension may score below this % of its weight
 orchestration:
   max_rework_loops: 3       # per scope; then escalate to a human
