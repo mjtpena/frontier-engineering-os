@@ -1,0 +1,13 @@
+version: "1.0"
+severity_policy:
+  critical: {release_blocking: true, sla_days: 0}
+  high:     {release_blocking: true, sla_days: 7}
+  medium:   {release_blocking: false, requires: [owner, expiry_date, accepted_by_security_owner]}
+  low:      {release_blocking: false, requires: [backlog_item]}
+required_scans: [sast, dependency_audit, secret_scan, iac_scan]
+ai_specific_checks:
+  - indirect_prompt_injection_paths_identified
+  - tool_allow_list_enforced
+  - least_privilege_connectors
+  - content_safety_enabled
+  - output_treated_as_untrusted

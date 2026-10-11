@@ -1,0 +1,35 @@
+# Weighted quality rubric. Each dimension scored 0-4 by the reviewer with cited evidence.
+# Dimension score % = score/4. Weighted total = sum(weight * score/4). Threshold: feos.config.yaml quality.release_threshold.
+# Deterministic signals CAP judged scores (cannot be overridden by the reviewer).
+version: "1.0"
+dimensions:
+  correctness:
+    weight: 30
+    anchors: {0: "Fails acceptance criteria or tests", 2: "Meets happy path; gaps in edge/negative cases", 4: "All AC incl. negative/boundary verified by passing tests"}
+    caps: [{if: "tests_failed", max: 0}, {if: "untested_acceptance_criteria", max: 2}]
+  security:
+    weight: 20
+    anchors: {0: "Secret/injection/authz flaw present", 2: "No known flaws; some L1 practices missing", 4: "All L1 security practices met, validated by scans"}
+    caps: [{if: "secret_in_diff", max: 0}, {if: "open_high_or_critical", max: 0}]
+  maintainability:
+    weight: 15
+    anchors: {0: "Unreadable / duplicated / violates architecture", 2: "Readable; minor smells", 4: "Clean, consistent with ADRs and patterns, small units"}
+  performance:
+    weight: 10
+    anchors: {0: "Violates an NFR", 2: "No evidence either way", 4: "NFR verified by measurement"}
+  observability:
+    weight: 10
+    anchors: {0: "No logs/traces for new paths", 2: "Logs only", 4: "Structured logs, traces, metrics, no PII"}
+  documentation:
+    weight: 5
+    anchors: {0: "Missing", 2: "Partial", 4: "Docs/ADRs/README updated in same PR"}
+  cost_efficiency:
+    weight: 5
+    anchors: {0: "Unbounded cost risk", 2: "Not considered", 4: "Cost impact estimated and bounded"}
+  accessibility:
+    weight: 5
+    anchors: {0: "WCAG AA failures", 2: "Automated checks only", 4: "Automated + manual keyboard pass", na: "No UI change → score 4 with note 'N/A'"}
+profiles:
+  requirements:  {use: [correctness, documentation], note: "For G1, correctness = completeness/testability of requirements; reweighted to 100"}
+  architecture:  {use: [correctness, security, maintainability, performance, observability, cost_efficiency], note: "reweighted to 100"}
+  implementation: {use: all}

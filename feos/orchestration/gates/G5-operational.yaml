@@ -1,0 +1,12 @@
+id: G5
+name: Operational readiness
+stage: S6
+scope: release
+checks:
+  - {id: G5.1, type: agent, agent: reviewer, hard: true, desc: "Monitoring + alerts defined as code for every SLO/NFR"}
+  - {id: G5.2, type: agent, agent: reviewer, hard: true, desc: "Rollback plan with trigger criteria, rehearsed in non-prod (date recorded)"}
+  - {id: G5.3, type: agent, agent: reviewer, hard: true, desc: "Runbook per new alert; on-call owner named"}
+  - {id: G5.4, type: deterministic, hard: true, desc: "Smoke tests defined and pass in staging", cmd: "CI staging smoke job"}
+  - {id: G5.5, type: deterministic, hard: false, desc: "SBOM generated", cmd: "CI sbom job"}
+  - {id: G5.6, type: human, decision: approve_production_release, hard: true, desc: "Release manager approves (approval.md + GitHub environment)"}
+on_fail: {route_to: release}

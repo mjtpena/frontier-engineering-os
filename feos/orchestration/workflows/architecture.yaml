@@ -1,0 +1,22 @@
+id: architecture
+description: S3 Architecture → Gate G2
+entry: {requires_state: [S3], requires_gates: [G1]}
+steps:
+  - id: design
+    actor: architect
+    inputs: [specs/prd.md, specs/brd.md, specs/research-pack.md]
+    outputs: [architecture/architecture.md, architecture/adrs/, architecture/nfr.md, feos/instructions/30-project/project.md]
+  - id: threat-model
+    actor: security
+    mode: threat_model
+    inputs: [architecture/architecture.md]
+    outputs: [architecture/threat-model.md]   # persisted by orchestrator (security is read-only)
+  - id: gate
+    actor: orchestrator
+    action: run_gate
+    gate: G2
+  - id: approve
+    actor: human
+    decision: approve_architecture_G2
+exit: {set_state: S4}
+on_fail: {route_to: architect, max_loops: from_config}

@@ -1,0 +1,40 @@
+name: feos-release
+on:
+  workflow_dispatch:
+    inputs:
+      version: {description: "Release version (vX.Y.Z)", required: true}
+permissions:
+  contents: read
+  id-token: write   # OIDC to Azure — no stored credentials
+jobs:
+  verify-approval-evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install -r scripts/requirements.txt
+      - name: Approval file must be approved by a human
+        run: |
+          python - <<'PY'
+          import re, sys, yaml
+          v = "${{ inputs.version }}"
+          t = open(f"evidence/release/{v}/approval.md").read()
+          fm = yaml.safe_load(re.match(r"^---\n(.*?)\n---", t, re.S).group(1))
+          ok = fm.get("decision") == "approved" and str(fm.get("approver","")).strip() not in ("", "TBD")
+          print(fm); sys.exit(0 if ok else 1)
+          PY
+  deploy-staging:
+    needs: verify-approval-evidence
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "TODO(project) deploy to staging using IaC + azure/login OIDC, then run smoke tests"
+  deploy-production:
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    environment: production   # configure required human reviewers on this environment
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "TODO(project) deploy to production; run smoke tests; auto-rollback on failure per rollback-plan"

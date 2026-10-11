@@ -1,0 +1,32 @@
+name: feos-validate
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      # Pin actions to full commit SHAs in your org (L2 github.md). Tags shown for readability.
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install -r scripts/requirements.txt pytest
+      - name: Framework self-check
+        run: python scripts/feos_validate.py
+      - name: Adapter drift
+        run: python scripts/feos_render.py --check
+      - name: FEOS unit tests
+        run: pytest -q feos-tests
+      - name: Backlog
+        if: hashFiles('plan/backlog.yaml') != ''
+        run: python scripts/feos_validate.py --backlog plan/backlog.yaml
+      - name: Traceability
+        if: hashFiles('specs/prd.md') != ''
+        run: python scripts/feos_trace.py
+      - name: Separation of duties
+        if: github.event_name == 'pull_request'
+        run: python scripts/feos_guard.py --base origin/${{ github.base_ref }}

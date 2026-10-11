@@ -1,0 +1,23 @@
+# FEOS configuration — edit per repository. Validated by scripts/feos_validate.py
+feos_version: "1.0"
+project:
+  name: TBD
+  owner: TBD            # accountable human (name or GitHub handle)
+platforms: [azure, github, foundry-agents]   # selects feos/instructions/10-platform/<name>.md
+domain: au-government                       # selects feos/instructions/20-domain/<name>.md ; use _template to start fresh
+iac: bicep                                  # bicep | terraform
+data_classification: OFFICIAL               # highest classification handled
+quality:
+  min_coverage: 80          # % line coverage on changed code
+  release_threshold: 85     # weighted score (0-100) required at G3 and release review
+  dimension_floor: 50       # no single dimension may score below this % of its weight
+orchestration:
+  max_rework_loops: 3       # per scope; then escalate to a human
+  parallel_tasks: 1         # raise only when tasks are independent (no shared files)
+approved_external_services: [learn.microsoft.com, docs.github.com, github.com]
+paths:
+  specs: specs
+  architecture: architecture
+  plan: plan
+  evidence: evidence
+  evals: evals

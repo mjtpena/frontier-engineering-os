@@ -1,0 +1,17 @@
+id: definition
+description: S2 Definition → Gate G1
+entry: {requires_state: [S2]}
+steps:
+  - id: write-requirements
+    actor: product
+    inputs: [specs/vision.md, specs/research-pack.md, specs/risk-register.md]
+    outputs: [specs/brd.md, specs/prd.md]
+  - id: gate
+    actor: orchestrator
+    action: run_gate
+    gate: G1
+  - id: approve
+    actor: human
+    decision: approve_requirements_G1
+exit: {set_state: S3}
+on_fail: {route_to: product, max_loops: from_config}
