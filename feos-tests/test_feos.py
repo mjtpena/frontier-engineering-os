@@ -115,6 +115,14 @@ def test_hook_blocks_protected_paths(repo):
     assert run(repo, "scripts/feos_hook_protect.py", stdin=payload(".github/workflows/feos-validate.yml"), env=env).returncode == 2
     assert run(repo, "scripts/feos_hook_protect.py", stdin=payload("src/app.py"), env=env).returncode == 0
 
+def test_hook_not_bypassed_by_subdir_cwd_notebook_or_bad_input(repo):
+    env = {k: v for k, v in os.environ.items() if k != "FEOS_FRAMEWORK_EDIT"}
+    sub = json.dumps({"tool_name": "Edit", "cwd": str(repo / "src"), "tool_input": {"file_path": str(repo / "feos/constitution.md")}})
+    assert run(repo, "scripts/feos_hook_protect.py", stdin=sub, env=env).returncode == 2
+    nb = json.dumps({"tool_name": "NotebookEdit", "cwd": str(repo), "tool_input": {"notebook_path": str(repo / "feos/x.ipynb")}})
+    assert run(repo, "scripts/feos_hook_protect.py", stdin=nb, env=env).returncode == 2
+    assert run(repo, "scripts/feos_hook_protect.py", stdin="not json", env=env).returncode == 2
+
 def git(repo, *a): subprocess.run(["git", *a], cwd=repo, check=True, capture_output=True)
 
 def test_guard_separation_of_duties(repo):
