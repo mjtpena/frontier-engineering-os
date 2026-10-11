@@ -1,17 +1,20 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python scripts/feos_:*)",
+      "Bash(python scripts/feos_*)",
       "Bash(git status:*)",
       "Bash(git diff:*)",
       "Bash(git log:*)"
     ],
+    "ask": [
+      "Bash(python scripts/feos_state.py resolve *)"
+    ],
     "deny": [
-      "Read(./.env)",
-      "Read(./.env.*)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
       "Read(./**/*.pem)",
       "Read(./**/*.pfx)",
-      "Read(./secrets/**)",
+      "Read(**/secrets/**)",
       "Bash(git push --force:*)",
       "Bash(git push -f:*)",
       "Bash(git push origin main:*)"
