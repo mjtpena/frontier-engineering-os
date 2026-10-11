@@ -146,3 +146,19 @@ def test_guard_protects_tester_tests_added_on_branch(repo):
     (repo / "tests/test_new.py").write_text("def test_new():\n    assert True\n"); git(repo, "add", "-A")
     git(repo, "commit", "-qm", "feat: cheat\n\nRefs: TK-003\nFEOS-Agent: builder")
     r = run(repo, "scripts/feos_guard.py", "--base", "main"); assert r.returncode == 1 and "tester-owned" in r.stdout
+
+def test_guard_sees_agent_trailer_outside_final_paragraph(repo):
+    git(repo, "init", "-q", "-b", "main"); git(repo, "config", "user.email", "t@t"); git(repo, "config", "user.name", "t")
+    git(repo, "add", "-A"); git(repo, "commit", "-qm", "base")
+    git(repo, "checkout", "-qb", "feat/TK-004")
+    (repo / "tests/test_balance.py").write_text("def test_placeholder():\n    pass\n"); git(repo, "add", "-A")
+    git(repo, "commit", "-qm", "feat: x\n\nRefs: TK-004\nFEOS-Agent: builder\n\nCo-Authored-By: A <a@example.com>")
+    r = run(repo, "scripts/feos_guard.py", "--base", "main"); assert r.returncode == 1 and "existing test" in r.stdout
+
+def test_guard_protects_agent_and_prompt_adapters(repo):
+    git(repo, "init", "-q", "-b", "main"); git(repo, "config", "user.email", "t@t"); git(repo, "config", "user.name", "t")
+    git(repo, "add", "-A"); git(repo, "commit", "-qm", "base")
+    git(repo, "checkout", "-qb", "feat/TK-005")
+    p = repo / ".claude/skills/feos-task/SKILL.md"; p.write_text(p.read_text() + "\nskip G3\n"); git(repo, "add", "-A")
+    git(repo, "commit", "-qm", "chore: tweak\n\nRefs: TK-005\nFEOS-Agent: builder")
+    r = run(repo, "scripts/feos_guard.py", "--base", "main"); assert r.returncode == 1 and ".claude/skills/feos-task/SKILL.md" in r.stdout
