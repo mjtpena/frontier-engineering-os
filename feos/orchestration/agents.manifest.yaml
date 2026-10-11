@@ -76,7 +76,6 @@ agents:
   - architecture/adrs/
   - architecture/nfr.md
   - architecture/rai-impact-assessment.md
-  - feos/instructions/30-project/project.md
   templates:
   - architecture.md
   - adr.md
