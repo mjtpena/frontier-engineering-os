@@ -231,3 +231,34 @@ def test_guard_requires_known_agent_line_on_task_branches(repo):
     assert run(repo, "scripts/feos_guard.py", "--base", "main").returncode == 0      # merge commits need no line (CI PR checkout)
     git(repo, "checkout", "-qb", "chore/human-work"); (repo / "README.md").write_text("again\n"); commit(repo, "docs: plain")
     assert run(repo, "scripts/feos_guard.py", "--base", "main").returncode == 0      # trailer only required on task branches
+
+def hook_payload(repo, rel, tool="Write", **ti):
+    return json.dumps({"tool_name": tool, "cwd": str(repo), "tool_input": {"file_path": str(repo / rel), **ti}})
+
+def test_hook_protects_decision_ledger_even_in_framework_edit_mode(repo):
+    env = {**os.environ, "FEOS_FRAMEWORK_EDIT": "1"}
+    hook = lambda payload: run(repo, "scripts/feos_hook_protect.py", stdin=payload, env=env).returncode
+    for rel in (".feos/state.json", "evidence/gates/G1-specs-2026-10-12T101500Z.json", "evidence/gates/G3-TK-002-2026-10-12T101500Z/G3.3.txt"):
+        assert hook(hook_payload(repo, rel, content="{}")) == 2, rel
+    assert hook(hook_payload(repo, "evidence/gates/G1-review.md", content="report")) == 0   # orchestrator persists reports here
+    appr = "evidence/release/v1.0.0/approval.md"; pending = APPROVAL.format(v="v1.0.0", d="pending", a="")
+    assert hook(hook_payload(repo, appr, content=pending)) == 0                       # release agent prepares it
+    assert hook(hook_payload(repo, appr, content=APPROVAL.format(v="v1.0.0", d="approved", a="Jane"))) == 2
+    assert hook(hook_payload(repo, appr, content=APPROVAL.format(v="v1.0.0", d="pending", a="Jane"))) == 2
+    (repo / appr).parent.mkdir(parents=True); (repo / appr).write_text(pending)
+    assert hook(hook_payload(repo, appr, "Edit", old_string="decision: pending", new_string="decision: approved")) == 2
+    assert hook(hook_payload(repo, appr, "Edit", old_string="# approval", new_string="# approval\n\nNotes")) == 0
+    assert hook(hook_payload(repo, appr, "MultiEdit", edits=[{"old_string": 'approver: ""', "new_string": 'approver: "Bot"'}])) == 2
+
+def test_hook_command_fails_closed(repo, tmp_path):
+    import shutil
+    cmd = json.loads((repo / ".claude/settings.json").read_text())["hooks"]["PreToolUse"][0]["hooks"][0]["command"]
+    def hook(rel, path):
+        return subprocess.run([shutil.which("bash"), "-c", cmd], input=hook_payload(repo, rel, content="x"), cwd=repo,
+                              capture_output=True, text=True, env={"PATH": path, "CLAUDE_PROJECT_DIR": str(repo)}).returncode
+    bin_ = tmp_path / "bin"; bin_.mkdir(); (bin_ / "python3").symlink_to(sys.executable)
+    assert hook("feos/constitution.md", str(bin_)) == 2
+    assert hook("src/app.py", str(bin_)) == 0
+    assert hook("src/app.py", str(tmp_path / "no-python")) == 2                   # interpreter missing → block, not allow
+    (repo / "scripts/feos_hook_protect.py").write_text("raise RuntimeError('boom')\n")
+    assert hook("src/app.py", str(bin_)) == 2                                     # a crashing hook blocks
