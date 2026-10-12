@@ -6,7 +6,7 @@ checks:
   - {id: G3.1, type: deterministic, hard: true, desc: "Build passes", cmd: "project.build"}
   - {id: G3.2, type: deterministic, hard: true, desc: "Lint/format clean", cmd: "project.lint"}
   - {id: G3.3, type: deterministic, hard: true, desc: "All tests pass", cmd: "project.test"}
-  - {id: G3.4, type: deterministic, hard: true, desc: "Coverage on changed code >= quality.min_coverage", cmd: "project.test (coverage report)"}
+  - {id: G3.4, type: deterministic, hard: true, desc: "Coverage on changed code >= quality.min_coverage", cmd: "project.coverage"}
   - {id: G3.5, type: deterministic, hard: true, desc: "Red evidence exists (tests failed before implementation) for impl tasks", cmd: "python scripts/feos_validate.py --task-evidence {task}"}
   - {id: G3.6, type: deterministic, hard: true, desc: "Tester-owned tests unchanged by builder; no edits to feos/, gates, CI, linter config", cmd: "python scripts/feos_guard.py --base origin/main"}
   - {id: G3.7, type: deterministic, hard: true, desc: "No secrets in diff", cmd: "CI secret scanning / gitleaks"}

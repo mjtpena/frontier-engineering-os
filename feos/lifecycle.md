@@ -33,11 +33,11 @@ S6 Hardening (Security + RAI + Ops review) ─G4→ ─G5→ HA (Human Approval)
 ## Gate mechanics
 Each gate in `feos/orchestration/gates/` declares checks of three types:
 
-- `deterministic` — a command; pass/fail from exit code (`scripts/` or CI).
-- `agent` — a read-only agent judges against a rubric and MUST cite evidence (file:line, command output).
-- `human` — a named human records a decision. Never satisfiable by an agent.
+- `deterministic` — a command; pass/fail from exit code. `feos_gate.py record` runs `python scripts/…` and `project.<key>` (project.md) commands itself. Checks run by CI or external scanners are asserted by the orchestrator with evidence and recorded as `verified_by: caller`.
+- `agent` — a read-only agent judges against a rubric and MUST cite evidence (file:line, command output). A verdict without evidence fails.
+- `human` — a named human records a decision (`feos_state.py resolve`); `record` reads it from `.feos/state.json`. Never satisfiable by an agent.
 
-Gate result = **FAIL** if any hard check fails; otherwise the weighted score is compared to the threshold.
+Gate result = **FAIL** if any hard check fails; otherwise the weighted score, computed by `record` from the reviewer's report, is compared to the threshold.
 Results are written to `evidence/gates/<gate>-<scope>-<timestamp>.json` (schema `feos/schemas/gate-result.schema.json`) and summarised in `.feos/state.json`.
 
 ## Rework routing

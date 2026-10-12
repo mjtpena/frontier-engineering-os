@@ -21,8 +21,9 @@ lint:    python scripts/feos_validate.py && python scripts/feos_render.py --chec
 test:    python -m pytest -q feos-tests
 e2e:     none
 format:  none   # no formatter configured
+coverage: TBD(@mjtpena, add pytest-cov with --cov-fail-under={min_coverage} once project code lands)
 ```
-Coverage reporter (G3.4): TBD(@mjtpena, add pytest-cov with --cov-fail-under once project code lands).
+`feos_gate.py record` runs `build`, `lint`, `test` and `coverage` itself for G3 (`none` passes, `TBD` fails). In `coverage`, `{min_coverage}` is replaced with `quality.min_coverage` from `feos.config.yaml`.
 
 ## Patterns & conventions
 - Framework changes are made in the canonical files under `feos/`, then `python scripts/feos_render.py` regenerates the adapters.
