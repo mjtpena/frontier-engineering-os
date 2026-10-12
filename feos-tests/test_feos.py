@@ -167,3 +167,26 @@ def test_guard_protects_agent_and_prompt_adapters(repo):
     p = repo / ".claude/skills/feos-task/SKILL.md"; p.write_text(p.read_text() + "\nskip G3\n"); git(repo, "add", "-A")
     git(repo, "commit", "-qm", "chore: tweak\n\nRefs: TK-005\nFEOS-Agent: builder")
     r = run(repo, "scripts/feos_guard.py", "--base", "main"); assert r.returncode == 1 and ".claude/skills/feos-task/SKILL.md" in r.stdout
+
+APPROVAL = "---\nid: APPROVAL-{v}\nrelease: {v}\ndecision: {d}\napprover: \"{a}\"\ndate: \"\"\n---\n# approval\n"
+
+def test_release_check_requires_human_approval_for_that_release(repo):
+    d = repo / "evidence/release/v1.0.0"; d.mkdir(parents=True)
+    for bad in ('v1.0.0"; import os #', "v1.0.0/../../x", "1.0.0", ""):
+        r = run(repo, "scripts/feos_release_check.py", bad); assert r.returncode == 1 and "vX.Y.Z" in r.stdout, bad
+    assert run(repo, "scripts/feos_release_check.py", "v1.0.0").returncode == 1                      # file missing
+    (d / "approval.md").write_text(APPROVAL.format(v="v1.0.0", d="pending", a=""))
+    assert run(repo, "scripts/feos_release_check.py", "v1.0.0").returncode == 1
+    (d / "approval.md").write_text(APPROVAL.format(v="v1.0.0", d="approved", a="TBD"))
+    assert run(repo, "scripts/feos_release_check.py", "v1.0.0").returncode == 1
+    (d / "approval.md").write_text(APPROVAL.format(v="v0.9.0", d="approved", a="Jane Citizen"))  # copied from another release
+    assert run(repo, "scripts/feos_release_check.py", "v1.0.0").returncode == 1
+    (d / "approval.md").write_text(APPROVAL.format(v="v1.0.0", d="approved", a="Jane Citizen"))
+    assert run(repo, "scripts/feos_release_check.py", "v1.0.0").returncode == 0
+
+def test_release_workflow_never_interpolates_inputs_into_scripts(repo):
+    wf = yaml.safe_load((repo / ".github/workflows/feos-release.yml").read_text())
+    for job in wf["jobs"].values():
+        for step in job["steps"]:
+            assert "${{" not in step.get("run", ""), step
+    assert "id-token" not in wf.get("permissions", {})

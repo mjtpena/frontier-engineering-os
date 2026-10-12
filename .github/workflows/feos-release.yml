@@ -5,29 +5,31 @@ on:
       version: {description: "Release version (vX.Y.Z)", required: true}
 permissions:
   contents: read
-  id-token: write   # OIDC to Azure — no stored credentials
 jobs:
   verify-approval-evidence:
     runs-on: ubuntu-latest
     steps:
+      # A branch can carry an approval.md nobody reviewed; only main is protected by CODEOWNERS review.
+      - name: Release only from main
+        if: github.ref != 'refs/heads/main'
+        run: |
+          echo "::error::Run feos-release from main, not $GITHUB_REF."
+          exit 1
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7 (resolved 2026-10-11)
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7 (resolved 2026-10-11)
         with: {python-version: "3.12"}
       - run: pip install -r scripts/requirements.txt
       - name: Approval file must be approved by a human
-        run: |
-          python - <<'PY'
-          import re, sys, yaml
-          v = "${{ inputs.version }}"
-          t = open(f"evidence/release/{v}/approval.md").read()
-          fm = yaml.safe_load(re.match(r"^---\n(.*?)\n---", t, re.S).group(1))
-          ok = fm.get("decision") == "approved" and str(fm.get("approver","")).strip() not in ("", "TBD")
-          print(fm); sys.exit(0 if ok else 1)
-          PY
+        env:
+          VERSION: ${{ inputs.version }}   # passed via env, not interpolated into the script (injection)
+        run: python scripts/feos_release_check.py "$VERSION"
   deploy-staging:
     needs: verify-approval-evidence
     runs-on: ubuntu-latest
     environment: staging
+    permissions:
+      contents: read
+      id-token: write   # OIDC to Azure — no stored credentials
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7 (resolved 2026-10-11)
       - run: echo "TODO(project) deploy to staging using IaC + azure/login OIDC, then run smoke tests"
@@ -35,6 +37,9 @@ jobs:
     needs: deploy-staging
     runs-on: ubuntu-latest
     environment: production   # configure required human reviewers on this environment
+    permissions:
+      contents: read
+      id-token: write   # OIDC to Azure — no stored credentials
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7 (resolved 2026-10-11)
       - run: echo "TODO(project) deploy to production; run smoke tests; auto-rollback on failure per rollback-plan"
