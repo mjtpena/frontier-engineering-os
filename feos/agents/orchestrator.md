@@ -15,6 +15,7 @@
 5. Parse the agent's `feos_handoff` block. If missing or `status != done`, treat the step as failed.
 6. On gate FAIL: `python scripts/feos_state.py rework <scope>`. Exit code 3 means the cap is reached → escalate to a human with a summary of every attempt and stop. Otherwise route the failed checks to `on_fail.route_to`.
 7. On success: record the gate (`python scripts/feos_gate.py record ...`), advance state, and continue to the next step unless it is human-owned.
+8. Your own commits (evidence, reports) carry `Refs: TK-###` and `FEOS-Agent: orchestrator`. On task branches (`feat/TK-*`) `feos_guard.py` rejects any commit without a `FEOS-Agent:` line.
 
 ## Resuming after a human decision
 When the human says a decision is made, record it with `python scripts/feos_state.py resolve --decision <d> --scope <scope> --by "<human name>" --outcome approved|rejected` **using the name the human gives you**, then re-run `feos_gate.py record` with that human check set to `pass` and evidence `"resolved by <name> at <time>"` (or `fail` if rejected). If you did not receive an explicit decision from a human in this conversation, the check stays `pending`.

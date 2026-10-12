@@ -190,3 +190,44 @@ def test_release_workflow_never_interpolates_inputs_into_scripts(repo):
         for step in job["steps"]:
             assert "${{" not in step.get("run", ""), step
     assert "id-token" not in wf.get("permissions", {})
+
+def task_branch(repo, name):
+    git(repo, "init", "-q", "-b", "main"); git(repo, "config", "user.email", "t@t"); git(repo, "config", "user.name", "t")
+    git(repo, "add", "-A"); git(repo, "commit", "-qm", "base"); git(repo, "checkout", "-qb", name)
+
+def commit(repo, msg): git(repo, "add", "-A"); git(repo, "commit", "-qm", msg)
+
+def test_guard_blocks_builder_test_runner_config(repo):
+    task_branch(repo, "feat/TK-006")
+    (repo / "conftest.py").write_text("import pytest\ndef pytest_collection_modifyitems(items):\n"
+                                      "    for i in items: i.add_marker(pytest.mark.skip)\n")
+    commit(repo, "feat: x\n\nRefs: TK-006\nFEOS-Agent: builder")
+    r = run(repo, "scripts/feos_guard.py", "--base", "main"); assert r.returncode == 1 and "conftest.py" in r.stdout
+    git(repo, "reset", "-q", "--hard", "main")
+    (repo / "tests/pytest.ini").write_text("[pytest]\naddopts = -k nothing\n"); commit(repo, "feat: x\n\nFEOS-Agent: builder")
+    r = run(repo, "scripts/feos_guard.py", "--base", "main"); assert r.returncode == 1 and "pytest.ini" in r.stdout
+    git(repo, "reset", "-q", "--hard", "main")
+    pkg = repo / "package.json"; pkg.write_text(json.dumps({"scripts": {"test": "vitest run"}, "dependencies": {}}))
+    commit(repo, "test: runner\n\nFEOS-Agent: tester")
+    pkg.write_text(json.dumps({"scripts": {"test": "vitest run"}, "dependencies": {"zod": "^3"}}))
+    commit(repo, "feat: dep\n\nFEOS-Agent: builder")
+    assert run(repo, "scripts/feos_guard.py", "--base", "main").returncode == 0      # dependencies are the builder's
+    pkg.write_text(json.dumps({"scripts": {"test": "exit 0"}, "dependencies": {"zod": "^3"}}))
+    commit(repo, "feat: cheat\n\nFEOS-Agent: builder")
+    r = run(repo, "scripts/feos_guard.py", "--base", "main"); assert r.returncode == 1 and "package.json" in r.stdout
+
+def test_guard_requires_known_agent_line_on_task_branches(repo):
+    task_branch(repo, "feat/TK-007-x")
+    (repo / "tests/test_balance.py").write_text("def test_placeholder():\n    pass\n"); commit(repo, "feat: no trailer")
+    r = run(repo, "scripts/feos_guard.py", "--base", "main"); assert r.returncode == 1 and "no 'FEOS-Agent" in r.stdout
+    git(repo, "reset", "-q", "--hard", "main")
+    (repo / "tests/test_balance.py").write_text("def test_placeholder():\n    pass\n"); commit(repo, "feat: x\n\nFEOS-Agent: buidler")
+    r = run(repo, "scripts/feos_guard.py", "--base", "main"); assert r.returncode == 1 and "unknown agent 'buidler'" in r.stdout
+    git(repo, "reset", "-q", "--hard", "main")
+    (repo / "README.md").write_text("human fix\n"); commit(repo, "docs: fix\n\nFEOS-Agent: human")
+    assert run(repo, "scripts/feos_guard.py", "--base", "main").returncode == 0
+    git(repo, "checkout", "-q", "main"); (repo / "CHANGELOG.md").write_text("x\n"); commit(repo, "chore: on main")
+    git(repo, "checkout", "-q", "feat/TK-007-x"); git(repo, "merge", "-q", "--no-ff", "main", "-m", "Merge main")
+    assert run(repo, "scripts/feos_guard.py", "--base", "main").returncode == 0      # merge commits need no line (CI PR checkout)
+    git(repo, "checkout", "-qb", "chore/human-work"); (repo / "README.md").write_text("again\n"); commit(repo, "docs: plain")
+    assert run(repo, "scripts/feos_guard.py", "--base", "main").returncode == 0      # trailer only required on task branches
