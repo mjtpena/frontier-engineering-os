@@ -1,0 +1,75 @@
+{
+  "feos_version": "1.0",
+  "stage": "S2",
+  "release": "v0.1.0",
+  "current_task": null,
+  "gates": {
+    "G1:specs": {
+      "result": "pending_human",
+      "evidence": "evidence\\gates\\G1-specs-2026-10-11T235727Z.json",
+      "at": "2026-10-11T23:57:27Z"
+    }
+  },
+  "rework": {
+    "specs": 1
+  },
+  "escalations": [
+    {
+      "decision": "approve_vision",
+      "scope": "vision",
+      "summary": "Review and approve specs/vision.md for the open-source readiness initiative before S1 Discovery.",
+      "status": "approved",
+      "at": "2026-10-11T23:44:43Z",
+      "by": "@mjtpena",
+      "resolved_at": "2026-10-11T23:46:09Z"
+    },
+    {
+      "decision": "approve_requirements_G1",
+      "scope": "specs",
+      "summary": "Review and approve or reject specs/prd.md; G1.1-G1.5 pass, score 92.9%. Evidence: evidence/G1-requirements-rereview.md and evidence/gates/G1-specs-2026-10-11T235727Z.json",
+      "status": "open",
+      "at": "2026-10-11T23:57:31Z"
+    }
+  ],
+  "history": [
+    {
+      "at": "2026-10-11T23:44:07Z",
+      "event": "init"
+    },
+    {
+      "at": "2026-10-11T23:44:43Z",
+      "event": "escalate",
+      "decision": "approve_vision"
+    },
+    {
+      "at": "2026-10-11T23:46:09Z",
+      "event": "resolve",
+      "decision": "approve_vision",
+      "by": "@mjtpena",
+      "outcome": "approved"
+    },
+    {
+      "at": "2026-10-11T23:48:39Z",
+      "event": "stage",
+      "frm": "S0",
+      "to": "S2"
+    },
+    {
+      "at": "2026-10-11T23:53:24Z",
+      "event": "rework",
+      "scope": "specs",
+      "n": 1
+    },
+    {
+      "at": "2026-10-11T23:57:27Z",
+      "event": "gate",
+      "gate": "G1:specs",
+      "result": "pending_human"
+    },
+    {
+      "at": "2026-10-11T23:57:31Z",
+      "event": "escalate",
+      "decision": "approve_requirements_G1"
+    }
+  ]
+}
