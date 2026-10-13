@@ -1,4 +1,7 @@
-# Frontier Engineering Operating System (FEOS) — v1.0 kit
+# Frontier Engineering Operating System (FEOS)
+
+[![feos-validate](https://github.com/mjtpena/frontier-engineering-os/actions/workflows/feos-validate.yml/badge.svg)](https://github.com/mjtpena/frontier-engineering-os/actions/workflows/feos-validate.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 An AI-native delivery operating system for Microsoft-centric engineering teams: **specifications → specialist agents → gates → human approval → production**.
 Works with **Claude Code** (subagents, skills, hooks) and **GitHub Copilot** (custom agents, instructions, prompt files) from one canonical source.
@@ -15,6 +18,13 @@ Works with **Claude Code** (subagents, skills, hooks) and **GitHub Copilot** (cu
 | Quality / security / AI rubrics | `feos/orchestration/evaluations/*.yaml` | `feos_gate.py score`, `feos_gate.py ai-eval` |
 | Separation of duties | read-only reviewer/security; tester owns tests | tool allow-lists, `feos_guard.py`, Claude hook `feos_hook_protect.py` |
 | Who decides | `feos/orchestration/raci.yaml` | human-only decisions can't be recorded by agents |
+
+> **Status:** v1.0 pilot kit, with no tagged releases yet. The deterministic layer (scripts, CI, hook, branch protection) is tested. The workflows themselves are followed by LLM agents, not by a runtime engine. Read [JUDGEMENT.md](JUDGEMENT.md) for what is verified and what is not.
+
+## Adopting FEOS in your repository
+1. Copy `feos/`, `scripts/`, `feos-tests/`, `.claude/`, `.github/`, `CLAUDE.md`, `AGENTS.md` and `feos.config.yaml` into the root of your repository. Merge, rather than overwrite, any of these files you already have.
+2. Do the human set-up below. In particular, fill the `TBD` values and choose your platform and domain layers in `feos.config.yaml`.
+3. Run the quick start for your tool. [HANDOFF_PROMPT.md](HANDOFF_PROMPT.md) is a scripted install-and-prove run for Claude Code.
 
 ## Quick start (Claude Code)
 ```bash
@@ -37,4 +47,13 @@ Select agent **feos-orchestrator** in Chat, or run prompt files `/feos-init`, `/
 ## Changing the framework
 Edit canonical files under `feos/`, run `python scripts/feos_render.py`, open a PR (CODEOWNERS). In Claude Code, set `FEOS_FRAMEWORK_EDIT=1` for that session, otherwise the protection hook blocks edits.
 
-See `JUDGEMENT.md` for the pre-handoff review, verified behaviour and known limitations.
+See [JUDGEMENT.md](JUDGEMENT.md) for the pre-handoff review, verified behaviour and known limitations.
+
+## Contributing
+Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) and the [code of conduct](CODE_OF_CONDUCT.md). For help, see [SUPPORT.md](SUPPORT.md). Changes are tracked in [CHANGELOG.md](CHANGELOG.md).
+
+## Security
+Please report vulnerabilities privately, as described in [SECURITY.md](SECURITY.md). Do not use public issues.
+
+## Licence
+[MIT](LICENSE) © 2026 Michael John Peña.

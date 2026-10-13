@@ -76,6 +76,8 @@ def framework(r: Report):
         if d.get("A") not in raci["roles"]: r.err(f"raci {name}: accountable role {d.get('A')} not in roles")
 
     # gates
+    from feos_gate import project_commands
+    project_keys = set(project_commands())
     gate_ids = set()
     for g in sorted((ROOT / "feos/orchestration/gates").glob("*.yaml")):
         gate = yaml.safe_load(g.read_text())
@@ -90,6 +92,8 @@ def framework(r: Report):
                 if c.get("decision") not in decisions: r.err(f"{g.name} {c['id']}: unknown decision {c.get('decision')}")
             m = re.search(r"python scripts/(\S+\.py)", c.get("cmd", ""))
             if m and not (ROOT / "scripts" / m.group(1)).exists(): r.err(f"{g.name} {c['id']}: script {m.group(1)} missing")
+            m = re.fullmatch(r"project\.(\w+)", c.get("cmd", ""))
+            if m and m.group(1) not in project_keys: r.err(f"{g.name} {c['id']}: project.md has no '{m.group(1)}' command")
             r.passed()
         if not has_human: r.err(f"{g.name}: every gate must contain a human check")
         if gate.get("on_fail", {}).get("route_to") not in ids: r.err(f"{g.name}: on_fail.route_to unknown")

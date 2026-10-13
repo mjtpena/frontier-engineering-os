@@ -1,0 +1,32 @@
+[
+  {
+    "id": "G1.1",
+    "status": "pass",
+    "evidence": ["python scripts/feos_validate.py --artifacts specs: PASS, 5 checks"]
+  },
+  {
+    "id": "G1.2",
+    "status": "pass",
+    "evidence": ["python scripts/feos_trace.py --stage requirements: PASS, 26 checks"]
+  },
+  {
+    "id": "G1.3",
+    "status": "pass",
+    "evidence": ["python scripts/feos_lint_requirements.py specs/prd.md: PASS, 0 vague terms"]
+  },
+  {
+    "id": "G1.4",
+    "status": "pass",
+    "evidence": ["evidence/G1-requirements-rereview.md: every FR has five path classes and all NFRs are measurable"]
+  },
+  {
+    "id": "G1.5",
+    "status": "pass",
+    "evidence": ["evidence/G1-requirements-rereview.md: requirements consistent and solution-free"]
+  },
+  {
+    "id": "G1.6",
+    "status": "pending",
+    "evidence": ["Product owner approval of specs/prd.md is required"]
+  }
+]

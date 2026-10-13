@@ -27,7 +27,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python \"$(git rev-parse --show-toplevel)/scripts/feos_hook_protect.py\""
+            "command": "d=\"$(git rev-parse --show-toplevel 2>/dev/null || printf %s \"$CLAUDE_PROJECT_DIR\")\"; py=\"$(command -v python3 || command -v python)\"; if [ -z \"$d\" ] || [ -z \"$py\" ]; then echo \"FEOS: repository root or Python not found; blocking edit (fail closed).\" >&2; exit 2; fi; \"$py\" \"$d/scripts/feos_hook_protect.py\" || exit 2"
           }
         ]
       }

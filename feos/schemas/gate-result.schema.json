@@ -42,6 +42,18 @@
         "null"
       ]
     },
+    "review": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "score_failures": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "checks": {
       "type": "array",
       "items": {
@@ -79,6 +91,14 @@
             "items": {
               "type": "string"
             }
+          },
+          "verified_by": {
+            "enum": [
+              "record",
+              "escalation",
+              "caller"
+            ],
+            "description": "record: run by feos_gate.py; escalation: from .feos/state.json; caller: asserted in the claims file"
           }
         }
       }
